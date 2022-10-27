@@ -57,7 +57,7 @@ function Header({}: Props) {
             <Image
               className="h-full w-full object-oriented"
               alt="eBay Thirdweb Logo"
-              src="https://links.papareact.com/bdb"
+              src="https://i.imgur.com/zYNWBB5.png"
               width={100}
               height={100}
             />
