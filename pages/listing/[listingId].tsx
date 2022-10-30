@@ -19,6 +19,7 @@ import { ListingType, NATIVE_TOKENS } from '@thirdweb-dev/sdk';
 import Countdown from 'react-countdown';
 import network from '../../utils/network';
 import { ethers } from 'ethers';
+import toast from 'react-hot-toast';
 
 function ListingPage() {
   const router = useRouter();
@@ -85,7 +86,32 @@ function ListingPage() {
     }
   };
 
+  const successNotif = (message: string) => {
+    return toast.success(message, {
+      className: 'border border-solid border-green-600',
+    });
+  };
+
+  const errorNotif = (message: string) => {
+    return toast.error(message, {
+      className: 'border border-solid border-red-600',
+    });
+  };
+
+  const loadingNotif = (message: string) => {
+    return toast.loading(() => (
+      <div className="flex items-center">
+        <div>{message}</div>
+        <div className="hidden md:inline max-h-50 p-5">
+          <MediaRenderer src={listing?.asset.image} />
+        </div>
+      </div>
+    ));
+  };
+
   const buyNft = async () => {
+    const buyingNftToast = loadingNotif('Buying NFT...');
+
     if (networkMismatch) {
       switchNetwork && switchNetwork(network);
       return;
@@ -101,19 +127,23 @@ function ListingPage() {
       },
       {
         onSuccess(data, variables, context) {
-          alert('NFT bought successfully!');
-          console.log('SUCCESS:', data, variables, context);
+          toast.remove(buyingNftToast);
+          successNotif('NFT bought successfully');
+          console.log('SUCCESS', data, variables, context);
           router.replace('/');
         },
         onError(error, variables, context) {
-          alert('ERROR: NFT could not be bought!');
-          console.error('ERROR:', error, variables, context);
+          toast.remove(buyingNftToast);
+          errorNotif('NFT could not be bought');
+          console.error('ERROR', error, variables, context);
         },
       }
     );
   };
 
   const createBidOrOffer = async () => {
+    const biddingOnNftToast = loadingNotif('Bidding on NFT...');
+
     try {
       if (networkMismatch) {
         switchNetwork && switchNetwork(network);
@@ -128,11 +158,14 @@ function ListingPage() {
         ) {
           console.log('Buyout Price met. Buying NFT...');
 
+          toast.remove(biddingOnNftToast);
           buyNft();
           return;
         }
 
         console.log('Buyout price not met. Making offer...');
+        toast.remove(biddingOnNftToast);
+        const makingOfferToast = loadingNotif('Making offer...');
         await makeOffer(
           {
             quantity: 1,
@@ -141,13 +174,15 @@ function ListingPage() {
           },
           {
             onSuccess(data, variables, context) {
-              alert('Offer made successfully!');
-              console.log('SUCCESS:', data, variables, context);
+              toast.remove(makingOfferToast);
+              successNotif('Offer made successfully');
+              console.log('SUCCESS', data, variables, context);
               setBidAmount('');
             },
             onError(error, variables, context) {
-              alert('ERROR: Offer could not be made!');
-              console.error('ERROR:', error, variables, context);
+              toast.remove(makingOfferToast);
+              errorNotif('Offer could not be made');
+              console.error('ERROR', error, variables, context);
             },
           }
         );
@@ -163,18 +198,21 @@ function ListingPage() {
           },
           {
             onSuccess(data, variables, context) {
-              alert('Bid made successfully!');
-              console.log('SUCCESS:', data, variables, context);
+              toast.remove(biddingOnNftToast);
+              successNotif('Bid made successfully');
+              console.log('SUCCESS', data, variables, context);
               setBidAmount('');
             },
             onError(error, variables, context) {
-              alert('ERROR: Bid could not be made!');
+              toast.remove(biddingOnNftToast);
+              errorNotif('Bid could not be made');
               console.error('ERROR:', error, variables, context);
             },
           }
         );
       }
     } catch (error) {
+      toast.remove(biddingOnNftToast);
       console.error(error);
     }
   };
@@ -274,7 +312,7 @@ function ListingPage() {
                             },
                             {
                               onSuccess(data, variables, context) {
-                                alert('Offer accepted successfully!');
+                                successNotif('Offer accepted successfully');
                                 console.log(
                                   'SUCCESS',
                                   data,
@@ -284,7 +322,7 @@ function ListingPage() {
                                 router.replace('/');
                               },
                               onError(error, variables, context) {
-                                alert('Offer could not be accepted');
+                                errorNotif('Offer could not be accepted');
                                 console.error(
                                   'ERROR',
                                   error,
