@@ -2,6 +2,7 @@ import React, { FormEvent, useState } from 'react';
 import Header from './../components/Header';
 import { useAddress, useContract } from '@thirdweb-dev/react';
 import { useRouter } from 'next/router';
+import toast from 'react-hot-toast';
 
 function addItem() {
   const address = useAddress();
@@ -14,8 +15,22 @@ function addItem() {
     'nft-collection'
   );
 
+  const successNotif = (message: string) => {
+    return toast.success(message, {
+      className: 'border border-solid border-green-600',
+    });
+  };
+
+  const errorNotif = (message: string) => {
+    return toast.error(message, {
+      className: 'border border-solid border-red-600',
+    });
+  };
+
   const mintNft = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const mintingNftToast = toast.loading('Minting NFT...');
 
     if (!contract || !address) return;
 
@@ -42,9 +57,13 @@ function addItem() {
       const tokenId = tx.id;
       const nft = await tx.data();
 
+      toast.remove(mintingNftToast);
+      successNotif('NFT successfully minted');
       console.log(receipt, tokenId, nft);
       router.push('/');
     } catch (error) {
+      toast.remove(mintingNftToast);
+      errorNotif('Could not mint NFT');
       console.error(error);
     }
   };

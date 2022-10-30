@@ -18,6 +18,7 @@ import {
   NATIVE_TOKEN_ADDRESS,
 } from '@thirdweb-dev/sdk';
 import network from '../utils/network';
+import toast from 'react-hot-toast';
 
 type Props = {};
 
@@ -56,6 +57,8 @@ function Create({}: Props) {
   const handleCreateListing = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const creatingListingToast = toast.loading('Creating listing...');
+
     if (networkMismatch) {
       switchNetwork && switchNetwork(network);
       return;
@@ -83,10 +86,14 @@ function Create({}: Props) {
           },
           {
             onSuccess(data, variables, context) {
+              toast.remove(creatingListingToast);
+              toast.success('Created Direct Listing');
               console.log('SUCCESS: ', data, variables, context);
               router.push('/');
             },
             onError(error, variables, context) {
+              toast.remove(creatingListingToast);
+              toast.error('Created Direct Listing');
               console.log('ERROR: ', error, variables, context);
             },
           }
