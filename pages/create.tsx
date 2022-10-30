@@ -54,6 +54,18 @@ function Create({}: Props) {
     error: errorDirect,
   } = useCreateAuctionListing(contract);
 
+  const successNotif = (message: string) => {
+    return toast.success(message, {
+      className: 'border border-solid border-green-600',
+    });
+  };
+
+  const errorNotif = (message: string) => {
+    return toast.error(message, {
+      className: 'border border-solid border-red-600',
+    });
+  };
+
   const handleCreateListing = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -87,13 +99,13 @@ function Create({}: Props) {
           {
             onSuccess(data, variables, context) {
               toast.remove(creatingListingToast);
-              toast.success('Created Direct Listing');
+              successNotif('Created Direct Listing');
               console.log('SUCCESS: ', data, variables, context);
               router.push('/');
             },
             onError(error, variables, context) {
               toast.remove(creatingListingToast);
-              toast.error('Created Direct Listing');
+              errorNotif('Failed to create Direct Listing');
               console.log('ERROR: ', error, variables, context);
             },
           }
@@ -113,10 +125,14 @@ function Create({}: Props) {
           },
           {
             onSuccess(data, variables, context) {
+              toast.remove(creatingListingToast);
+              successNotif('Created Auction Listing');
               console.log('SUCCESS: ', data, variables, context);
               router.push('/');
             },
             onError(error, variables, context) {
+              toast.remove(creatingListingToast);
+              errorNotif('Failed to create Auction Listing');
               console.log('ERROR: ', error, variables, context);
             },
           }
